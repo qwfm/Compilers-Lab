@@ -135,6 +135,15 @@ var      return yy::tiger_parser::make_VAR(loc);
 <<EOF>>    return yy::tiger_parser::make_EOF(loc);
 
  /* Catch-all rule that triggers an error */
+0|[1-9][0-9]*   {
+    errno = 0;
+    long v = strtol(yytext, nullptr, 10);
+    if (errno == ERANGE || v < 0 || v > TIGER_INT_MAX) {
+        utils::error(loc, "integer literal out of range");
+    }
+    // construct the token with both the int value and its location:
+    return yy::tiger_parser::make_INT(static_cast<int>(v), loc);
+}
 .          utils::error (loc, "invalid character");
 
 %%

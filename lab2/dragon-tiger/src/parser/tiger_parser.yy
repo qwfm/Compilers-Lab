@@ -78,19 +78,18 @@ using utils::nl;
 ;
 
 // Define tokens that have an associated value, such as identifiers or strings
-
 %token <Symbol> ID "id"
 %token <Symbol> STRING "string"
+%token <int> INT "integer" 
 
 // Declare the nonterminals types
-
 // %type <Var *> var;
 %type <VarDecl *> param;
 %type <std::vector<VarDecl *>> params nonemptyparams;
 %type <Decl *> decl funcDecl varDecl;
 %type <std::vector<Decl *>> decls;
 %type <Expr *> expr stringExpr seqExpr callExpr opExpr negExpr
-            assignExpr whileExpr forExpr breakExpr letExpr var;
+            assignExpr whileExpr forExpr breakExpr letExpr var intExpr;
 
 %type <std::vector<Expr *>> exprs nonemptyexprs;
 %type <std::vector<Expr *>> arguments nonemptyarguments;
@@ -128,6 +127,7 @@ expr: stringExpr { $$ = $1; }
    | forExpr { $$ = $1; }
    | breakExpr { $$ = $1; }
    | letExpr { $$ = $1; }
+   | intExpr { $$ = $1; }
 ;
 
 varDecl: VAR ID typeannotation ASSIGN expr
@@ -139,6 +139,10 @@ funcDecl: FUNCTION ID LPAREN params RPAREN typeannotation EQ expr
 ;
 
 /* Exprs */
+
+intExpr: INT
+  { $$ = new IntegerLiteral(@1, $1); }
+;
 
 stringExpr: STRING
   { $$ = new StringLiteral(@1, $1); }
