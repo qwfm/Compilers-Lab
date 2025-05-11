@@ -103,6 +103,8 @@ using utils::nl;
 // Declare precedence rules
 
 %nonassoc FUNCTION VAR TYPE DO OF ASSIGN;
+%left PLUS MINUS;
+%left DIVIDE TIMES;
 %left UMINUS;
 
 // Declare grammar rules and production actions
@@ -177,6 +179,21 @@ opExpr: expr PLUS expr   { $$ = new BinaryOperator(@2, $1, $3, o_plus); }
         $$ = new IfThenElse(@2, $1,
                             new IfThenElse(@3, $3, new IntegerLiteral(nl, 1), new IntegerLiteral(nl, 0)),
                             new IntegerLiteral(nl, 0));
+      }
+      | expr OR expr    {
+        $$ = new IfThenElse(@2, $1,
+                            new IntegerLiteral(nl, 1),
+                            new IfThenElse(@3, $3, new IntegerLiteral(nl, 1), new IntegerLiteral(nl, 0)));
+      }
+      | IF expr THEN expr ELSE expr {
+            $$ = new IfThenElse(@1, $2,       
+                    $4,      
+                    $6 ); 
+      }
+      | IF expr THEN expr %prec ELSE {
+            $$ = new IfThenElse(@1, $2,       
+                    $4,   
+                    new Sequence(nl, std::vector<Expr*>()) ); 
       }
 ;
 
