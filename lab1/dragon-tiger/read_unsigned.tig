@@ -11,8 +11,8 @@ let
           else
             bad := 1;
           c := getchar());
-        if bad = 1 | c = "" then
-          return -1
+        if bad = 1 then
+          -1
         else
           n
       end
