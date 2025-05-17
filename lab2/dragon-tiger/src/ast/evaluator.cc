@@ -1,44 +1,57 @@
 #include "evaluator.hh"
-#include "../utils/errors.hh"
 
 namespace ast {
-int Evaluator::evaluate(const Expr &root) {
-  root.accept(*this);
-  return result_;
-}
 
 void Evaluator::visit(const IntegerLiteral &lit) {
-  int result_ = lit.value;
+  result_ = lit.value;
 }
 
-void Evaluator::visit(const BinaryOperator &op) {
-  op.get_left().accept(*this); 
+void Evaluator::visit(const BinaryOperator &binop) {
+  // 1) обчислити лівий
+  binop.get_left().accept(*this);
   int lhs = result_;
-  op.get_right().accept(*this); 
+
+  // 2) обчислити правий
+  binop.get_right().accept(*this);
   int rhs = result_;
-  switch (op.op) {
-    case o_plus:   lhs + rhs;
-    case o_minus:  lhs - rhs;
-    case o_times:  lhs * rhs;
+
+  // 3) застосувати потрібну операцію
+  switch (binop.op) {
+    case o_plus:   result_ = lhs + rhs; break;
+    case o_minus:  result_ = lhs - rhs; break;
+    case o_times:  result_ = lhs * rhs; break;
     case o_divide:
-      if (rhs == 0)
-        {
-            utils::error("division by zero");
-            return;
-        }
-        
-      lhs / rhs;
-    case o_eq:    lhs == rhs;
-    case o_neq:   lhs != rhs;
-    case o_lt:    lhs < rhs;
-    case o_le:    lhs <= rhs;
-    case o_gt:    lhs > rhs;
-    case o_ge:    lhs >= rhs;
+      if (rhs == 0) utils::error("division by zero");
+      result_ = lhs / rhs;
+      break;
+    case o_eq:     result_ = (lhs == rhs); break;
+    case o_neq:    result_ = (lhs != rhs); break;
+    case o_lt:     result_ = (lhs < rhs);  break;
+    case o_le:     result_ = (lhs <= rhs); break;
+    case o_gt:     result_ = (lhs > rhs);  break;
+    case o_ge:     result_ = (lhs >= rhs); break;
     default:
-      utils::error("unknown operator");
+      utils::error("unknown binary operator");
   }
 }
-void visit(const IfThenElse &ite) {
 
+void Evaluator::visit(const Sequence &seq) {
+  const auto &exprs = seq.get_exprs();
+  if (exprs.empty()) {
+    utils::error("empty sequence");
+  }
+  for (auto &e : exprs) {
+    e->accept(*this);
+  }
 }
+
+void Evaluator::visit(const IfThenElse &ite) {
+  int cond = evaluate(ite.get_condition());
+  if (cond != 0) {
+    result_ = evaluate(ite.get_then_part());
+  } else {
+    result_ = evaluate(ite.get_else_part());
+  }
 }
+
+} 

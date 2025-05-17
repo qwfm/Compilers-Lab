@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "../ast/ast_dumper.hh"
+#include "../ast/evaluator.cc"
 #include "../parser/parser_driver.hh"
 #include "../utils/errors.hh"
 
@@ -10,6 +11,7 @@ int main(int argc, char **argv) {
   namespace po = boost::program_options;
   po::options_description options("Options");
   options.add_options()
+  ("eval,e", "evaluate integers")
   ("help,h", "describe arguments")
   ("dump-ast", "dump the parsed AST")
   ("trace-parser", "enable parser traces")
@@ -48,6 +50,17 @@ int main(int argc, char **argv) {
     parser_driver.result_ast->accept(dumper);
     dumper.nl();
   }
+  
+  if (vm.count("dump-ast") && vm.count("eval")) {
+  utils::error("cannot dump AST and evaluate at the same time");
+  } else if (vm.count("eval")) {
+    ast::Evaluator ev;
+    int v = ev.evaluate(*parser_driver.result_ast);
+    std::cout << v << "\n";
+    delete parser_driver.result_ast;
+    return 0;
+  }
+
   delete parser_driver.result_ast;
   return 0;
 }
