@@ -7,15 +7,12 @@ void Evaluator::visit(const IntegerLiteral &lit) {
 }
 
 void Evaluator::visit(const BinaryOperator &binop) {
-  // 1) обчислити лівий
   binop.get_left().accept(*this);
   int lhs = result_;
 
-  // 2) обчислити правий
   binop.get_right().accept(*this);
   int rhs = result_;
 
-  // 3) застосувати потрібну операцію
   switch (binop.op) {
     case o_plus:   result_ = lhs + rhs; break;
     case o_minus:  result_ = lhs - rhs; break;
