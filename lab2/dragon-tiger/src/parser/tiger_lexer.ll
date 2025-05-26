@@ -138,9 +138,8 @@ var      return yy::tiger_parser::make_VAR(loc);
 
  /* Catch-all rule that triggers an error */
 0|[1-9][0-9]*   {
-    errno = 0;
     long v = strtol(yytext, nullptr, 10);
-    if (errno == ERANGE || v < 0 || v > TIGER_INT_MAX) {
+    if (v > TIGER_INT_MAX && v < -1*TIGER_INT_MAX) {
         utils::error(loc, "integer literal out of range");
     }
     // construct the token with both the int value and its location:
